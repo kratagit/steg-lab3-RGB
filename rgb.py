@@ -215,18 +215,27 @@ if __name__ == "__main__":
         
         # Obliczanie maksymalnej pojemności obrazu
         max_bytes = stego.get_capacity_bytes(cover_img)
-        print(f"[*] Obliczona maksymalna pojemność obrazu: {max_bytes} znaków (bajtów).")
+        print(f"[*] Obliczona maksymalna pojemność algorytmu dla 1024x1024: {max_bytes} znaków (bajtów).")
         
         # Generowanie wiadomości zapychającej obraz "pod kurek"
         max_msg = "X" * max_bytes
+        print(f"[*] Wygenerowano syntetyczny ładunek:")
+        print(f"    -> '{max_msg[:30]} ... [łącznie {len(max_msg)} znaków] ... {max_msg[-30:]}'")
         
+        print(f"[*] Rozpoczęto osadzanie danych w matrycy...")
         stego.encode(cover_img, max_msg, stego_img)
-        extracted = stego.decode(stego_img)
-        psnr = stego.calculate_psnr(cover_img, stego_img)
         
-        print(f"[+] Jakość obrazu (PSNR): {psnr:.2f} dB")
+        print(f"[*] Rozpoczęto ślepą ekstrakcję steganogramu...")
+        extracted = stego.decode(stego_img)
+        
+        print(f"[+] Pomyślnie odzyskano ładunek z obrazu:")
+        print(f"    -> '{extracted[:30]} ...[łącznie {len(extracted)} znaków] ... {extracted[-30:]}'")
+        
+        psnr = stego.calculate_psnr(cover_img, stego_img)
+        print(f"[+] Obiektywna jakość steganogramu (PSNR): {psnr:.2f} dB")
+        
         if psnr > 40 and max_msg == extracted:
-            print("[SUKCES] Kryterium spełnione: PSNR > 40 dB, wiadomość odczytana poprawnie (maksymalna waga).")
+            print("[SUKCES] Kryterium spełnione: PSNR > 40 dB, ciąg znaków w 100% zgodny z oryginałem.")
         else:
             print("[BŁĄD] Kryterium niespełnione.")
     except Exception as e:
