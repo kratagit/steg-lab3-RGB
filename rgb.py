@@ -15,10 +15,19 @@ class AdaptiveRGBSteganography:
             data = data.encode('utf-8')
         return ''.join(format(byte, '08b') for byte in data)
 
-    def _binary_to_data(self, binary_data):
-        """Konwertuje ciąg bitów na tekst (UTF-8)."""
-        all_bytes = [int(binary_data[i: i+8], 2) for i in range(0, len(binary_data), 8) if len(binary_data[i:i+8]) == 8]
-        return bytes(all_bytes).decode('utf-8')
+    def _binary_to_data(self, binary_data, return_as_string=True):
+        """Konwertuje ciąg bitów na dane. Domyślnie zwraca tekst (UTF-8), opcjonalnie surowe bajty."""
+        all_bytes =[int(binary_data[i: i+8], 2) for i in range(0, len(binary_data), 8) if len(binary_data[i:i+8]) == 8]
+        byte_data = bytes(all_bytes)
+        
+        if return_as_string:
+            try:
+                return byte_data.decode('utf-8')
+            except UnicodeDecodeError:
+                # Jeśli to był plik binarny (np. .exe, .pdf, .zip), dekodowanie do tekstu się nie uda
+                # Zwracamy więc surowe bajty
+                return byte_data
+        return byte_data
 
     def _calculate_brightness_variance(self, block):
         """
@@ -179,7 +188,7 @@ if __name__ == "__main__":
     print("="*50)
     try:
         cover_img = os.path.join(test_dir, "test1_base_512.png")
-        stego_img = os.path.join(test_dir, "stego1_base.png")
+        stego_img = os.path.join(test_dir, "stego_test1_base.png")
         msg = "Steganografia RGB"
         
         print(f"[*] Plik nośnika: {cover_img}")
@@ -202,7 +211,7 @@ if __name__ == "__main__":
     print("="*50)
     try:
         cover_img = os.path.join(test_dir, "test2_capacity_1024.png")
-        stego_img = os.path.join(test_dir, "stego2_capacity.png")
+        stego_img = os.path.join(test_dir, "stego_test2_capacity.png")
         
         # Obliczanie maksymalnej pojemności obrazu
         max_bytes = stego.get_capacity_bytes(cover_img)
